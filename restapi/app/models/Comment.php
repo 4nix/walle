@@ -62,7 +62,7 @@ class Comment extends \Phalcon\Mvc\Model
      */
     public function initialize()
     {
-        $this->setSchema("zoo");
+        $this->setSchema("wx_zoo");
         $this->setSource("comment");
     }
 
