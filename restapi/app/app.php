@@ -137,7 +137,7 @@ $app->get('/zoo/race/{id:[0-9]+}', function ($id) {
         foreach ($skills as $k => $v) {
             $item['skills'][] = [
                 'id'    => $k,
-                'text'  => str_replace('x', $v, $config[$k]),
+                'text'  => str_replace('s', $v, $config[$k]),
                 'value' => $v
             ];
         }
@@ -159,14 +159,14 @@ $app->get('/zoo/top', function () {
             if (!isset($max[$key])) {
                 $max[$key] = [
                     'value'     => 0,
-                    'text'      => str_replace('x', 0, $config[$key]),
+                    'text'      => str_replace('s', 0, $config[$key]),
                     'animals'   => []
                 ];
             }
 
             if ($max[$key]['value'] < $value) {
                 $max[$key]['value'] = $value;
-                $max[$key]['text'] = str_replace('x', $value, $config[$key]);
+                $max[$key]['text'] = str_replace('s', $value, $config[$key]);
                 $max[$key]['animals'] = [];
                 $max[$key]['animals'][$animal->id] = $animal;
             } else if ($max[$key]['value'] == $value) {
@@ -183,6 +183,7 @@ $app->get('/zoo/skill/{id:[0-9]+}', function ($id) {
     $list = [];
     $config = include APP_PATH . "/config/zoo.php";
     $animals = Animal::find(['id_delete' => 0]);
+    $title = $config[$id];
     
     foreach ($animals as $animal) {
         $skills = json_decode($animal->skill, 1);
@@ -191,18 +192,30 @@ $app->get('/zoo/skill/{id:[0-9]+}', function ($id) {
                 continue;
             }
 
-            if (!isset($list[$value])) {
-                $list[$value] = [];
-            }
+            // if (!isset($list[$value])) {
+            //     $list[$value] = [];
+            // }
 
-            $list[$value][$animal->id] = $animal;
+            // $list[$value][$animal->id] = $animal->toArray();
+            if (!isset($list[$value])) {
+                $list[$value] = [
+                    'title'     => str_replace('s', $value, $title),
+                    'items'     => []
+                ];
+            }
+            $list[$value]['items'][] = [
+                'id'    => $animal->id,
+                'name'  => $animal->name
+            ];
         }
     }
 
     krsort($list);
+    preg_match('/(.+?).{2}s%/u', $title, $matches);
+
     $data = [
-        'info'  => $config[$id],
-        'list'  => $list
+        'title'  => $matches[1],
+        'list'  => array_values($list)
     ];
 
     return response($data);
